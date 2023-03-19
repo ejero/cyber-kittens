@@ -89,7 +89,27 @@ app.post('/kittens',setUser, async (req, res, next) => { // Step 7
 
 // DELETE /kittens/:id
 // TODO - takes an id and deletes the cat with that id
+app.delete('/kittens/:id', setUser, async(req,res,next) => {
+    // Find by pk
+    try{
+      const foundCat = await Kitten.findByPk(req.params.id);
+      if(!req.user){
+          res.sendStatus(401);
+          next()
+      } else if(foundCat.id !== req.user.id) {
+        res.sendStatus(401);
+        next();
+      }else {
+        await foundCat.destroy();
+        res.send(204);
+        next();
+      }
+    }catch(error){
+      console.error(error);
+      next(error);
+    }
 
+})
 
 
 // error handling middleware, so failed tests receive them
