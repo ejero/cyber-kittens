@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
 const { User, Kitten } = require('./db');
-// const jwt = require('jsonwebtoken');
-// const SALT_COUNT = 10;
-// const {JWT_SECRET = 'neverTell' } = process.env;
+const jwt = require('jsonwebtoken');
+const SALT_COUNT = 10;
+const {JWT_SECRET = 'neverTell' } = process.env;
 
 
 app.use(express.json());
@@ -55,28 +55,19 @@ app.get('/kittens/:id', setUser, async(req, res, next) => {
 
   try{
     const foundCat = await Kitten.findByPk(req.params.id);
-
     if(!req.user){
         res.sendStatus(401);
         next()
-    } else {
+    } else if(foundCat.id !== req.user.id) {
+      res.sendStatus(401);
+      next();
+    }else {
       res.send({name:foundCat, age:foundCat, color:foundCat});
     }
   }catch(error){
     console.error(error);
     next(error);
   }
-
-
-  // if(!req.user){
-  //   res.sendStatus(401);
-  //   next();
-  // }else if(findKittenById.id !== req.user.id){
-  //   res.sendStatus(401);
-  //   next();
-  // }else {
-  //   res.send(findKittenById);
-  // }
 })
 
 // POST /kittens
